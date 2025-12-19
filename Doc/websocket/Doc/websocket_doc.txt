@@ -1,0 +1,44 @@
+🧠 GIẢI THÍCH NGHIỆP VỤ (CỰC QUAN TRỌNG)
+🔹 Vì sao dùng WebSocket?
+
+Chat 2 chiều realtime
+
+Không cần refresh
+
+Giảm request HTTP
+
+🔹 Server làm gì?
+
+Quản lý room = conversation_id
+
+Push message realtime
+
+Lưu DB để audit
+
+🔹 Chatbot + Admin cùng tồn tại
+
+Chatbot trả lời ngay
+
+Admin có thể override
+
+Admin vào thì bot có thể tắt
+
+🛠 GỢI Ý TRIỂN KHAI THEO STACK
+🔥 NestJS
+
+@WebSocketGateway
+
+@SubscribeMessage
+
+Redis adapter (scale)
+
+☕ Spring Boot
+
+@EnableWebSocketMessageBroker
+
+STOMP + SockJS
+
+✍️ CÂU GHI BÁO CÁO (CHUẨN)
+
+Hệ thống chat sử dụng WebSocket để đảm bảo giao tiếp thời gian thực giữa người dùng và hệ thống.
+Mỗi cuộc hội thoại được ánh xạ với một room riêng, đảm bảo khả năng mở rộng và lưu trữ lịch sử chat.
