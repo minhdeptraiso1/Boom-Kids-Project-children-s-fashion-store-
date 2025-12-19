@@ -1,0 +1,144 @@
+```@startuml
+' ==========================================================
+' ERD - Kids Clothing Shop
+' Cart + Voucher + Discount + Loyalty + Chat
+' ==========================================================
+
+entity USERS {
+  + id  BIGINT PK
+  --
+  full_name  VARCHAR
+  email  VARCHAR
+  password  VARCHAR
+  phone  VARCHAR
+  role  ENUM
+  loyalty_points  INT
+  created_at  TIMESTAMP
+}
+
+entity CONVERSATIONS {
+  + id  BIGINT PK
+  --
+  status  ENUM  ' OPEN  CLOSED
+  created_at  TIMESTAMP
+  closed_at  TIMESTAMP
+  user_id  BIGINT FK
+}
+
+entity MESSAGES {
+  + id  BIGINT PK
+  --
+  sender_type  ENUM  ' USER  ADMIN  BOT
+  sender_id  BIGINT
+  content  TEXT
+  created_at  TIMESTAMP
+  conversation_id  BIGINT FK
+}
+
+entity BOT_RESPONSES {
+  + id  BIGINT PK
+  --
+  keyword  VARCHAR
+  response  TEXT
+  is_active  BOOLEAN
+}
+
+entity POINT_TRANSACTIONS {
+  + id  BIGINT PK
+  --
+  type  ENUM
+  points  INT
+  description  VARCHAR
+  created_at  TIMESTAMP
+  user_id  BIGINT FK
+  order_id  BIGINT FK
+  voucher_id  BIGINT FK
+}
+
+entity CARTS {
+  + id  BIGINT PK
+  --
+  created_at  TIMESTAMP
+  user_id  BIGINT FK
+}
+
+entity CART_ITEMS {
+  + id  BIGINT PK
+  --
+  quantity  INT
+  cart_id  BIGINT FK
+  product_variant_id  BIGINT FK
+}
+
+entity ORDERS {
+  + id  BIGINT PK
+  --
+  total_amount  DECIMAL
+  discount_amount  DECIMAL
+  final_amount  DECIMAL
+  status  ENUM
+  payment_method  ENUM
+  created_at  TIMESTAMP
+  user_id  BIGINT FK
+  voucher_id  BIGINT FK
+}
+
+entity ORDER_ITEMS {
+  + id  BIGINT PK
+  --
+  quantity  INT
+  price  DECIMAL
+  order_id  BIGINT FK
+  product_variant_id  BIGINT FK
+}
+
+entity PAYMENTS {
+  + id  BIGINT PK
+  --
+  amount  DECIMAL
+  method  ENUM
+  status  ENUM
+  paid_at  TIMESTAMP
+  order_id  BIGINT FK
+}
+
+entity VOUCHERS {
+  + id  BIGINT PK
+  --
+  code  VARCHAR
+  discount_type  ENUM
+  value  DECIMAL
+  min_order_amount  DECIMAL
+  required_points  INT
+  usage_limit  INT
+  used_count  INT
+  start_date  DATE
+  end_date  DATE
+  is_active  BOOLEAN
+}
+
+entity VOUCHER_USERS {
+  + id  BIGINT PK
+  --
+  used_at  TIMESTAMP
+  user_id  BIGINT FK
+  voucher_id  BIGINT FK
+}
+
+' ================= RELATIONSHIPS =================
+
+USERS --o{ CONVERSATIONS  starts
+CONVERSATIONS --o{ MESSAGES  contains
+
+USERS --o{ CARTS  owns
+CARTS --o{ CART_ITEMS  contains
+
+USERS --o{ ORDERS  places
+ORDERS --o{ ORDER_ITEMS  includes
+ORDERS -- PAYMENTS  paid_by
+
+USERS --o{ POINT_TRANSACTIONS  has
+USERS --o{ VOUCHER_USERS  owns
+VOUCHERS --o{ VOUCHER_USERS  assigned_to
+VOUCHERS --o{ ORDERS  used_in
+@enduml``` ERD shop BIBOOM kids
