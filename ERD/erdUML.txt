@@ -1,0 +1,240 @@
+@startuml
+'--- Thiết lập giao diện ---
+skinparam theme plain
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam class {
+    BackgroundColor White
+    ArrowColor #2D3E50
+    BorderColor #2D3E50
+    HeaderBackgroundColor #E8F1F8
+}
+
+title ERD Hệ thống Website Quần áo Trẻ em Boomkids
+
+'========================
+' PHÂN HỆ NGƯỜI DÙNG
+'========================
+package "User Management" {
+    entity users {
+        + id : BIGINT <<PK>>
+        --
+        name : VARCHAR
+        email : VARCHAR
+        password : VARCHAR
+        phone : VARCHAR
+        role : ENUM(ADMIN, CUSTOMER)
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+}
+
+'========================
+' PHÂN HỆ SẢN PHẨM
+'========================
+package "Product System" {
+    entity categories {
+        + id : BIGINT <<PK>>
+        --
+        name : VARCHAR
+        parent_id : BIGINT <<FK>>
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+
+    entity products {
+        + id : BIGINT <<PK>>
+        --
+        category_id : BIGINT <<FK>>
+        name : VARCHAR
+        description : TEXT
+        original_price : DECIMAL
+        current_price : DECIMAL
+        discount_percent : INT
+        gender : ENUM(BOY, GIRL, UNISEX)
+        status : ENUM(ACTIVE, INACTIVE)
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+
+    entity product_images {
+        + id : BIGINT <<PK>>
+        --
+        product_id : BIGINT <<FK>>
+        image_url : TEXT
+        is_main : BOOLEAN
+        created_at : TIMESTAMP
+    }
+
+    entity sizes {
+        + id : BIGINT <<PK>>
+        --
+        name : VARCHAR
+    }
+
+    entity colors {
+        + id : BIGINT <<PK>>
+        --
+        name : VARCHAR
+        hex_code : VARCHAR
+    }
+
+    entity product_variants {
+        + id : BIGINT <<PK>>
+        --
+        product_id : BIGINT <<FK>>
+        size_id : BIGINT <<FK>>
+        color_id : BIGINT <<FK>>
+        quantity : INT
+        sku : VARCHAR <<UNIQUE>>
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+}
+
+'========================
+' PHÂN HỆ GIỎ HÀNG & BÁN HÀNG
+'========================
+package "Shopping & Sales" {
+    entity carts {
+        + id : BIGINT <<PK>>
+        --
+        user_id : BIGINT <<FK>>
+        created_at : TIMESTAMP
+    }
+
+    entity cart_items {
+        + id : BIGINT <<PK>>
+        --
+        cart_id : BIGINT <<FK>>
+        product_variant_id : BIGINT <<FK>>
+        quantity : INT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+
+    entity orders {
+        + id : BIGINT <<PK>>
+        --
+        user_id : BIGINT <<FK>>
+        total_price : DECIMAL
+        status : ENUM(PENDING, CONFIRMED, SHIPPING, DELIVERED, CANCELLED)
+        payment_status : ENUM(UNPAID, PAID, REFUNDED)
+        payment_method : ENUM(COD, BANKING, MOMO)
+        shipping_address : TEXT
+        customer_note : TEXT
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+
+    entity order_items {
+        + id : BIGINT <<PK>>
+        --
+        order_id : BIGINT <<FK>>
+        product_variant_id : BIGINT <<FK>>
+        quantity : INT
+        price_at_purchase : DECIMAL
+        created_at : TIMESTAMP
+    }
+
+    '========================
+    ' CHAT SYSTEM
+    '========================
+    entity conversations {
+        + id : BIGINT <<PK>>
+        --
+        user_id : BIGINT <<FK>>
+        type : ENUM(USER_ADMIN, USER_BOT)
+        status : ENUM(OPEN, CLOSED)
+        created_at : TIMESTAMP
+        updated_at : TIMESTAMP
+    }
+
+    entity messages {
+        + id : BIGINT <<PK>>
+        --
+        conversation_id : BIGINT <<FK>>
+        sender_type : ENUM(USER, ADMIN, BOT)
+        sender_id : BIGINT (nullable)
+        content : TEXT
+        created_at : TIMESTAMP
+    }
+}
+
+'========================
+' PHÂN HỆ ĐÁNH GIÁ – KHUYẾN MÃI – RECOMMEND
+'========================
+package "Support & Marketing" {
+
+    entity reviews {
+        + id : BIGINT <<PK>>
+        --
+        user_id : BIGINT <<FK>>
+        product_id : BIGINT <<FK>>
+        order_item_id : BIGINT <<FK>>
+        rating : INT
+        comment : TEXT
+        created_at : TIMESTAMP
+    }
+
+    entity vouchers {
+        + id : BIGINT <<PK>>
+        --
+        code : VARCHAR
+        discount_percent : INT
+        min_order_value : DECIMAL
+        expired_at : TIMESTAMP
+        created_at : TIMESTAMP
+    }
+
+    entity order_vouchers {
+        + order_id : BIGINT <<FK>>
+        + voucher_id : BIGINT <<FK>>
+        applied_at : TIMESTAMP
+    }
+
+    '========================
+    ' RECOMMENDATION SYSTEM (LEVEL 2)
+    '========================
+    entity user_behaviors {
+        + id : BIGINT <<PK>>
+        --
+        user_id : BIGINT <<FK>>
+        product_id : BIGINT <<FK>>
+        action : ENUM(VIEW, ADD_TO_CART, PURCHASE)
+        created_at : TIMESTAMP
+    }
+}
+
+'========================
+' ĐỊNH NGHĨA QUAN HỆ
+'========================
+categories ||--o{ categories : parent
+categories ||--o{ products
+products ||--o{ product_images
+products ||--o{ product_variants
+sizes ||--o{ product_variants
+colors ||--o{ product_variants
+
+users ||--|| carts
+carts ||--o{ cart_items
+product_variants ||--o{ cart_items
+
+users ||--o{ orders
+orders ||--o{ order_items
+product_variants ||--o{ order_items
+
+users ||--o{ reviews
+products ||--o{ reviews
+order_items ||--o{ reviews
+
+orders ||--o{ order_vouchers
+vouchers ||--o{ order_vouchers
+
+users ||--o{ conversations
+conversations ||--o{ messages
+
+users ||--o{ user_behaviors : performs
+products ||--o{ user_behaviors : tracked
+@enduml
